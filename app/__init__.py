@@ -7,5 +7,5 @@ app = Flask(__name__)
 # load the config file
 app.config.from_object('config')
 
-from app.views import home
-app.register_blueprint(home.mod)
+from .views.website import website
+app.register_blueprint(website)

@@ -3,15 +3,13 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
-  <title>E2W MONITOR</title>
+  <title>{% block title %}{% endblock %}</title>
 
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="../../static/css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection"/>
   <link href="../../static/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
 </head>
-
-
 
 <body>
 
@@ -20,19 +18,16 @@
     <div class="nav-wrapper">
      <img id="logo-container" class="brand-logo center" src="../../static/images/logo_branca.png" />
       <ul id="nav-mobile" class="right hide-on-med-and-down">
-        <li><a href="sass.html">Remoto</a></li>
-        <li><a href="badges.html">Dashboard</a></li>
-        <li><a href="login.html">Login</a></li>
+        <li><a href="remoto">Remoto</a></li>
+        <li><a href="dashboard">Dashboard</a></li>
+        <li><a href="login">Login</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- Titulo principal -->
-  <h2 class="header center green-text">LOGIN</h2>
-    <div class="row center">
-        <h5 class="header col s12 light">PAGINA DE LOGIN.</h5>
-    </div>
-
+   {% block body %}
+    <!-- AQUI VAI O BLOCO DE CADA PAGINA -->
+   {% endblock %}
 
     <!-- Footer -->
   <footer class="page-footer green">
