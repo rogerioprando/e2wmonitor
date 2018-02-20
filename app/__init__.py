@@ -9,3 +9,6 @@ app.config.from_object('config')
 
 from .views.website import website
 app.register_blueprint(website)
+
+from .views.auth import auth
+app.register_blueprint(auth)
