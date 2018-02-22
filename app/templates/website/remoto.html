@@ -15,7 +15,7 @@
     <!-- Enviar Comando -->
   <div class="container">
     <div class="row">
-        <form class="col s12">
+        <form class="col s12" method="post">
           <div class="row">
             <div class="input-field col s12 m6 l3">
               <i class="material-icons prefix">directions_bus</i>
@@ -36,14 +36,13 @@
                 <label for="test5">MDT</label>
             </div>
           </div>
+          <button id="submit-btn" class="btn waves-effect waves-light" type="submit" name="action">Enviar
+                <i class = "material-icons right">send</i></button>
+          <button id="cancel-btn" class="btn waves-effect waves-light red disabled" type="submit" name="action">Cancelar
+                <i class = "material-icons right">cancel</i></button>
         </form>
     </div>
-
-      <button id="submit-btn" class="btn waves-effect waves-light" type="submit" name="action">Enviar
-            <i class = "material-icons right">send</i></button>
-      <button id="cancel-btn" class="btn waves-effect waves-light red disabled" type="submit" name="action">Cancelar
-            <i class = "material-icons right">cancel</i></button>
-   <br><br>
+    <br>
    <div id="loading-cmd" class="preloader-wrapper small">
     <div class="spinner-layer spinner-green-only">
       <div class="circle-clipper left">
@@ -56,7 +55,8 @@
     </div>
   </div>
 
-    <h4 class="header center green-text text-darken-2">Respostas:</h4>
+    <h4 class="header center green-text text-darken-2">Resposta:</h4>
+      <p><br> {{ ans_xvm }}</p>
     <br><br>
   </div>
 {% endblock %}
