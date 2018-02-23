@@ -2,7 +2,7 @@ import socket
 import re
 import sys
 import json
-from multiprocessing import Process, Queue, Manager
+from multiprocessing import Process, Queue, Manager, Pipe
 
 UDP_PORT = 4047
 
@@ -20,16 +20,15 @@ class SocketServer:
         self.num_sequence = 1            # sequencia das mensagens 0001 a 7FFF (hexadecimal)
         self.manager = Manager()
         self.addr_devices_list = self.manager.dict()
-        self.requests = self.manager.dict()
+        self.pending_requests = self.manager.dict()
 
     def init_queues(self):
-        receiver_process = Process(target=self.receiving, args=(self, self.sock, self.addr_devices_list, self.requests))
-        sender_process = Process(target=self.sending, args=(self, self.sock, self.addr_devices_list))
-        receiver_process.start()
-        sender_process.start()
+        self.receiver_process = Process(target=self.receiving)
+        self.sender_process = Process(target=self.sending)                                  
+        self.receiver_process.start()
+        self.sender_process.start()
 
-    @staticmethod
-    def receiving(self, sock, devices_addrs, pending_requests):
+    def receiving(self):
         sock.bind(('', UDP_PORT))
         while True:
             try:
@@ -39,22 +38,38 @@ class SocketServer:
                 print('[RECV] Recebido {} de {}' .format(data, addr))
                 id = re.findall(r'ID=([A-F0-9]{4})', data)
                 id_str = str(id[0])
-                devices_addrs[id_str] = addr
+                self.devices_addrs[id_str] = addr
                 self.answer_ack(self, data)
                 print('DICT recv {}'.format(pending_requests))
                 if not self.iskeepalive(data):
-                    pending_requests[id_str].put(data)         # exception ?
+                    # self.pending_request['4116']['channels'][1] é o pipe_writer
+                    # quem chama await_response() lá embaixo chama o pipe_reader.recv()
+                    # correspondente, então ele vai receber este 'data' aqui:
+                    self.pending_requests[id_str]['channels'][1].send(data)
+
                     #self.socketrecv_queue.put(data)
             except(EOFError, KeyboardInterrupt):
                 print('Exit receiving ...')
                 sys.exit(0)
 
-    @staticmethod
-    def sending(self, sock, devices_addrs):
+    def sending(self):
         while True:
             try:
-                to_send = self.socketsend_queue.get()  # to_send[0]: data to_send[1]: id
-                if bool(devices_addrs.get(to_send[1])):
+                # só um aviso de que tem coisa nova no self.pending_requests
+                _work = self.socketsend_queue.get()
+
+                # aqui vai ter que olhar dentro de self.pending_requests e
+                # determinar quais itens devem ser enviados agora
+                # Lembrando: a estrutura do pending_requests é
+                # {'device_id': {'data': '>QTT; bla blah<',
+                #                'sent': True/False,
+                #                'channels': (reader,writer)}}
+                    
+                //TODO: olhar dentro do self.pending_requests e ver qual comandos enviar.
+
+                # esse bloco não funciona agora pq device_id e to_send ainda não foram
+                # lidos de dentro do self.pending_requests                
+                if bool(devices_addrs.get(device_id)):
                     sock.sendto((to_send[0] + '\r\n').encode(), devices_addrs[to_send[1]])
                     # essa linha localhost usa apenas quando for testar sem virloc
                     # sock.sendto((msg[0] + '\r\n').encode(), ('localhost', 4095))
@@ -95,17 +110,27 @@ class SocketServer:
                 crc = crc ^ ch
         return crc
 
-    def send_command(self, id, cmd):
-        print('queue no send_command {}' .format(self.requests))
-        if self.requests.get(id) is not None:
+    def sendcommand(self, device_id, cmd):
+        if self.requests.get(device_id) is not None:
             return 'busy'
         default = '>{cmd};ID={id};#{seq};*{crc}<'
-        send = default.format(cmd=str(cmd).upper(), id=id, seq=str(hex(self.num_sequence))[2:].upper().zfill(4), crc=0)
-        crc = hex(self.calcula_crc(send))[2:].upper().zfill(2)
-        send = default.format(cmd=str(cmd).upper(), id=id, seq=str(hex(self.num_sequence))[2:].upper().zfill(4), crc=str(crc))
-        to_send = send, id
-        self.socketsend_queue.put(to_send)
-        self.requests[id] = self.manager.Queue()        # dicionario de filas
+
+        xvm_cmd = default.format(cmd=cmd.upper(),
+                                 id=device_id,
+                                 seq=str(hex(self.num_sequence))[2:].upper().zfill(4),
+                                 crc=0)
+
+        crc = hex(self.calcula_crc(xvm_cmd))[2:].upper().zfill(2)
+        
+        xvm_cmd = default.format(cmd=str(cmd).upper(),
+                                 id=device_id,
+                                 seq=str(hex(self.num_sequence))[2:].upper().zfill(4),
+                                 crc=str(crc))
+        new_request = {'channels': Pipe(), 'sent': false, 'xvm': xvm_cmd}
+        self.pending_requests[device_id] = new_request
+
+        self.socketsend_queue.put(device_id) # só avisa o processo SocketServer.sending()
+
         if self.num_sequence < 32767:
             self.num_sequence = self.num_sequence + 1
         else:
@@ -113,6 +138,11 @@ class SocketServer:
         return id
 
     def wait_response(self, request_id, timeout=5):
-        q = self.requests[request_id]
+        request = self.pending_requests[request_id]
         print('DICT waitresponse {}' .format(self.requests))
-        return q.get(timeout=timeout)
+
+        reader = request[request_id]['channels'][0]
+        if reader.poll(timeout):
+            return reader.recv()
+        else:
+            return 'timeout'
