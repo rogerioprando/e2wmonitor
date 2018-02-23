@@ -6,7 +6,7 @@ $(document).ready(function() {
     $('#loading-cmd').addClass('active');
     //$('#loading-cmd').show().addClass('active');
     //https://codehandbook.org/python-flask-jquery-ajax-post/
-    var id = $('#id').val();
+    /*var id = $('#id').val();
     var cmd = $('#command').val();
     $.ajax({
         url: '/send',
@@ -19,7 +19,7 @@ $(document).ready(function() {
             console.log(error);
             }
         });
-    });
+    }); */
 
    // submit
 

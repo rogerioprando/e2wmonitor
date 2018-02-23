@@ -15,8 +15,11 @@ class Server:
         self.runner.start()
         
     def run(self):
+        print('waiting to run')
         time.sleep(2)
+        print('running')
         for k,p in self.pipes.items():
+            print('for items')
             p[1][1].send('response for %s is %s' % (p[0],'Heey'))
 
     def send_request(self, request_id, request_data):
@@ -29,10 +32,12 @@ class Server:
 
 if __name__ == '__main__':
     manager = Manager()
-    proc = Server(manager)
-    proc.start()
+    proc = Server(manager)      # obj process
+    proc.start()                # start process -> target run()
 
     my_id = 'hey'
-    proc.send_request(my_id, 'a request')
-    response = proc.await_response(my_id)
+    proc.send_request(my_id, 'a request')   # request with id and a command
+    print('made send_request, now waiting')
+    response = proc.await_response(my_id)   # wait the answer from sent id
+    print('done')
     print(response)

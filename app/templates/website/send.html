@@ -15,7 +15,7 @@
     <!-- Enviar Comando -->
   <div class="container">
     <div class="row">
-        <form class="col s12" method="post">
+        <form class="col s12" method="post" action="{{ url_for('website.send_message_to_device') }}">
           <div class="row">
             <div class="input-field col s12 m6 l3">
               <i class="material-icons prefix">directions_bus</i>
@@ -36,9 +36,9 @@
                 <label for="test5">MDT</label>
             </div>
           </div>
-          <button id="submit-btn" class="btn waves-effect waves-light" type="submit" name="action">Enviar
+          <button id="submit-btn" class="btn waves-effect waves-light" type="submit">Enviar
                 <i class = "material-icons right">send</i></button>
-          <button id="cancel-btn" class="btn waves-effect waves-light red disabled" type="submit" name="action">Cancelar
+          <button id="cancel-btn" class="btn waves-effect waves-light red disabled" type="button" name="action">Cancelar
                 <i class = "material-icons right">cancel</i></button>
         </form>
     </div>
