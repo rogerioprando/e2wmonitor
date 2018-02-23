@@ -12,7 +12,7 @@ def send_message_to_device():
     id = request.form['id_xvm']
     cmd = request.form['cmd_xvm']
     #conect_xvm.sendcommand(json.dumps({'status': 'OK', 'idwplex': id, 'command': cmd}))
-    request_id = conect_xvm.sendcommand(id, cmd)
+    request_id = conect_xvm.send_command(id, cmd)
     print('sendcmd')
     try:
         if request_id == 'busy':
@@ -23,17 +23,17 @@ def send_message_to_device():
         ans_request = 'timeout'
     print('ans_request')
     #return jsonify({'ans_xvm' : ans_request})
-    return render_template('website/remoto.html', ans_xvm=ans_request)
+    return render_template('website/send.html', ans_xvm=ans_request)
 
 
 @website.route('/send', methods=['GET'])
 def show_xvm_form():
-    return render_template('website/remoto.html')
+    return render_template('website/send.html')
 
 
 @website.route('/dashboard')
-def index(page):
-    return render_template('website/dashboard.html' % page)
+def dashboard():
+    return render_template('website/dashboard.html')
 
 
 

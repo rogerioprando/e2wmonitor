@@ -95,7 +95,8 @@ class SocketServer:
                 crc = crc ^ ch
         return crc
 
-    def sendcommand(self, id, cmd):
+    def send_command(self, id, cmd):
+        print('queue no send_command {}' .format(self.requests))
         if self.requests.get(id) is not None:
             return 'busy'
         default = '>{cmd};ID={id};#{seq};*{crc}<'
@@ -104,7 +105,7 @@ class SocketServer:
         send = default.format(cmd=str(cmd).upper(), id=id, seq=str(hex(self.num_sequence))[2:].upper().zfill(4), crc=str(crc))
         to_send = send, id
         self.socketsend_queue.put(to_send)
-        self.requests[id] = self.manager.Queue()
+        self.requests[id] = self.manager.Queue()        # dicionario de filas
         if self.num_sequence < 32767:
             self.num_sequence = self.num_sequence + 1
         else:
@@ -112,6 +113,6 @@ class SocketServer:
         return id
 
     def wait_response(self, request_id, timeout=5):
-        q = self.requests[request_id]       # dicionario de filas
+        q = self.requests[request_id]
         print('DICT waitresponse {}' .format(self.requests))
         return q.get(timeout=timeout)
