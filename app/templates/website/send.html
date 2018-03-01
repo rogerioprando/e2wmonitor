@@ -15,24 +15,29 @@
     <!-- Enviar Comando -->
   <div class="container">
     <div class="row">
-        <form class="col s12" method="post" action="{{ url_for('website.send_message_to_device') }}">
+        <!--form class="col s12" method="post" action="{{ url_for('website.send_message_to_device') }}"-->
+        <form id="form-send-command" class="col s12" role="form" method="POST" action="{{ url_for('website.send_message_to_device') }}">
           <div class="row">
             <div class="input-field col s12 m6 l3">
               <i class="material-icons prefix">directions_bus</i>
-              <input id="icon_prefix" type="text" class="validate" name="id_xvm">
-              <label for="icon_prefix">ID WPLEX</label>
+              <select id="select-input-xvm-id">
+                {% for device in online_devices %}
+                <option value="{{ device }}">{{ device }}</option>
+                {% endfor %}
+              </select>
+              <label>ID WPLEX</label>
             </div>
           </div>
           <div class="row">
             <div class="input-field col s12 m6 l3">
               <i class="material-icons prefix">arrow_forward</i>
-              <input id="icon_telephone" type="text" class="validate" name="cmd_xvm">
-              <label for="icon_telephone">Comando XVM</label>
+              <input id="cmd-xvm" type="text" class="validate" name="cmd_xvm">
+              <label for="cmd-xvm">Comando XVM</label>
             </div>
           </div>
           <div class="row">
             <div class="checkbox col s12 m6 l3">
-                <input type="checkbox" class="filled-in" id="filled-in-box" name="mdt_xvm"/>
+                <input type="checkbox" class="filled-in" id="filled-in-box" value="False" name="mdt_xvm"/>
                 <label for="filled-in-box">MDT</label>
             </div>
           </div>
@@ -43,20 +48,25 @@
         </form>
     </div>
     <br>
-   <div id="loading-cmd" class="preloader-wrapper small">
-    <div class="spinner-layer spinner-green-only">
-      <div class="circle-clipper left">
-        <div class="circle"></div>
-      </div><div class="gap-patch">
-        <div class="circle"></div>
-      </div><div class="circle-clipper right">
-        <div class="circle"></div>
+    <!--Bordered Table-->
+    <div id="bordered-table">
+      <h4 class="header center green-text text-darken-2">Respostas</h4>
+      <div class="row">
+        <div class="col s12">
+          <table class="bordered" id="result-table">
+            <thead>
+              <tr>
+                <!--th data-field="id">Respostas</th-->
+              </tr>
+            </thead>
+            <tbody id="tbody-result-table">
+              <tr>
+                <!--td>First</td-->
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
-
-    <h4 class="header center green-text text-darken-2">Resposta:</h4>
-      <p><br> {{ ans_xvm }}</p>
-    <br><br>
   </div>
 {% endblock %}

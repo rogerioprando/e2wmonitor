@@ -99,7 +99,7 @@ class SocketServer:
     def send_command(self, device_id, cmd, mdt):
         if device_id in self.pending_requests is False:
             return 'busy'
-        if mdt is None:
+        if mdt == 'False':
             default = '>{cmd};ID={id};#{seq};*{crc}<'   # Virloc
         else:
             default = '>{cmd};ID={id}V;#{seq};*{crc}<'  # Vircom
