@@ -97,7 +97,8 @@ class SocketServer:
         return crc
 
     def send_command(self, device_id, cmd, mdt):
-        if device_id in self.pending_requests is False:
+        print('self.pending_requests {}' .format(str(self.pending_requests)))
+        if self.pending_requests.get(str(device_id)) is not None:
             return 'busy'
         if mdt == 'False':
             default = '>{cmd};ID={id};#{seq};*{crc}<'   # Virloc
@@ -130,6 +131,9 @@ class SocketServer:
         request = self.pending_requests[request_id]
         reader = request['channels'][READER]
         if reader.poll(timeout):
-            return reader.recv()
+            answer = reader.recv()
+            del self.pending_requests[request_id]
+            return answer
         else:
+            del self.pending_requests[request_id]
             return 'timeout'

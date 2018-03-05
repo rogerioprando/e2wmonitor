@@ -1,28 +1,39 @@
-from flask import Blueprint, render_template, request, jsonify, json
+from flask import Blueprint, render_template, request, jsonify, flash, redirect, session, abort
 from app.SocketServer import *
+from collections import defaultdict
 
 
 website = Blueprint('website', __name__)
 xvm_connection = SocketServer()
 xvm_connection.start_process()
-ans_request = []
+answer = defaultdict(list)
 
 
 @website.route('/send', methods=['GET', 'POST'])
 def send_message_to_device():
-    if request.method == 'POST':
-        json = request.get_json()
-        id_xvm = json['id_xvm']
-        cmd_xvm = json['cmd_xvm']
-        mdt_xvm = json['mdt_xvm']
-        request_id = xvm_connection.send_command(id_xvm, cmd_xvm, mdt_xvm)
-        if request_id == 'busy':
-            ans_request.append('busy')
+    if not session.get('logged_in'):
+        return render_template('auth/login.html')
+    else:
+        user = session['logged_in']
+        cookie_value = request.cookies.get('session')
+        print('cookie: {}'.format(cookie_value))
+        if request.method == 'POST':
+            json = request.get_json()
+            id_xvm = json['id_xvm']
+            cmd_xvm = json['cmd_xvm']
+            mdt_xvm = json['mdt_xvm']
+            request_id = xvm_connection.send_command(id_xvm, cmd_xvm, mdt_xvm)
+            if request_id == 'busy':
+                answer[cookie_value].append('busy')
+            else:
+                temp = xvm_connection.wait_response(id_xvm, timeout=5)
+                answer[cookie_value].append(temp)
+            return jsonify(ans_request=answer[cookie_value])
+        if bool(xvm_connection.addr_devices_list.keys()) is False:
+            devices = 0
         else:
-            ans_request.append(xvm_connection.wait_response(request_id, timeout=5))
-        print('ans_request: {}' .format(ans_request))
-        return jsonify(ans_request=ans_request)
-    return render_template('website/send.html', online_devices=xvm_connection.addr_devices_list.keys())
+            devices = xvm_connection.addr_devices_list.keys()
+        return render_template('website/send.html', online_devices=devices, user=user)
 
 # guardar essa "ideia"
 #@website.route('/show_devices')
@@ -35,5 +46,8 @@ def send_message_to_device():
 
 @website.route('/dashboard')
 def dashboard():
-    return render_template('website/dashboard.html')
+    if not session.get('logged_in'):
+        return render_template('auth/login.html')
+    else:
+        return render_template('website/dashboard.html')
 

@@ -20,10 +20,16 @@
           <div class="row">
             <div class="input-field col s12 m6 l3">
               <i class="material-icons prefix">directions_bus</i>
-              <select id="select-input-xvm-id">
-                {% for device in online_devices %}
-                <option value="{{ device }}">{{ device }}</option>
-                {% endfor %}
+                {% if online_devices == 0 %}
+                <select id="select-input-xvm-id disabled"disabled selected>
+                <option value="" >Dispositivos Offline</option>
+                </select>
+                {% else %}
+                <select id="select-input-xvm-id">
+                  {% for device in online_devices %}
+                  <option value="{{ device }}">{{ device }}</option>
+                  {% endfor %}
+                {% endif %}
               </select>
               <label>ID WPLEX</label>
             </div>
@@ -31,7 +37,11 @@
           <div class="row">
             <div class="input-field col s12 m6 l3">
               <i class="material-icons prefix">arrow_forward</i>
-              <input id="cmd-xvm" type="text" class="validate" name="cmd_xvm">
+              {% if online_devices == 0 %}
+                <input disabled id="cmd-xvm disabled" type="text" class="validate" name="cmd_xvm">
+              {% else %}
+                <input id="cmd-xvm" type="text" class="validate" name="cmd_xvm">
+              {% endif %}
               <label for="cmd-xvm">Comando XVM</label>
             </div>
           </div>
@@ -41,7 +51,11 @@
                 <label for="filled-in-box">MDT</label>
             </div>
           </div>
-          <button id="submit-btn" class="btn waves-effect waves-light" type="submit">Enviar
+          {% if online_devices == 0 %}
+            <button id="submit-btn disabled" class="btn waves-effect waves-light disabled" type="submit">Enviar
+          {% else %}
+            <button id="submit-btn" class="btn waves-effect waves-light" type="submit">Enviar
+          {% endif %}
                 <i class = "material-icons right">send</i></button>
           <button id="cancel-btn" class="btn waves-effect waves-light red disabled" type="button" >Cancelar
                 <i class = "material-icons right">cancel</i></button>

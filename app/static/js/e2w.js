@@ -50,6 +50,9 @@ $(document).ready(function() {
             "mdt_xvm": check
         });
 
+        // temporario:
+        var id_solicitado = $('#select-input-xvm-id option:selected').text()
+
         //var foo2 = $('#select-input-xvm-id option:selected').val();
         //alert(foo2.toString())
 
@@ -68,6 +71,7 @@ $(document).ready(function() {
                 $('#cancel-btn').addClass('btn waves-effect waves-light red disabled');
                 //$('#ans-xvm').text(callback.ans_request);
                 $('#tbody-result-table').empty();
+                //alert(callback.ans_request)
                 for (var i = 0; i <callback.ans_request.length; i ++) {
                     $('#result-table').append('<tr><td>' + callback.ans_request[i] + '</td></tr>');
                 }
