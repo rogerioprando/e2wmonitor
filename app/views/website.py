@@ -8,7 +8,8 @@ xvm_connection = SocketServer()
 xvm_connection.start_process()
 answer = defaultdict(list)
 
-
+"""
+COM USO DE LOGIN:
 @website.route('/send', methods=['GET', 'POST'])
 def send_message_to_device():
     if not session.get('logged_in'):
@@ -34,6 +35,32 @@ def send_message_to_device():
         else:
             devices = xvm_connection.addr_devices_list.keys()
         return render_template('website/send.html', online_devices=devices, user=user)
+
+"""
+
+
+@website.route('/send', methods=['GET', 'POST'])
+def send_message_to_device():
+    #user = session['logged_in']
+    cookie_value = request.cookies.get('session')
+    print('cookie: {}'.format(cookie_value))
+    if request.method == 'POST':
+        json = request.get_json()
+        id_xvm = json['id_xvm']
+        cmd_xvm = json['cmd_xvm']
+        mdt_xvm = json['mdt_xvm']
+        request_id = xvm_connection.send_command(id_xvm, cmd_xvm, mdt_xvm)
+        if request_id == 'busy':
+            answer[cookie_value].append('busy')
+        else:
+            temp = xvm_connection.wait_response(id_xvm, timeout=5)
+            answer[cookie_value].append(temp)
+        return jsonify(ans_request=answer[cookie_value])
+    if bool(xvm_connection.addr_devices_list.keys()) is False:
+        devices = 0
+    else:
+        devices = xvm_connection.addr_devices_list.keys()
+    return render_template('website/send.html', online_devices=devices)
 
 # guardar essa "ideia"
 #@website.route('/show_devices')

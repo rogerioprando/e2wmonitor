@@ -12,6 +12,7 @@ $(document).ready(function() {
     $('#cancel-btn').on('click', function() {
         $(this).addClass('disabled');
         $('#submit-btn').addClass('btn waves-effect waves-light').removeClass('disabled');
+        Materialize.toast('Cancelado', 4000)
         //$('#loading-cmd').removeClass('active').addClass('preloader-wrapper small');
         //$('#loading-cmd').hide();
     });
@@ -72,9 +73,39 @@ $(document).ready(function() {
                 //$('#ans-xvm').text(callback.ans_request);
                 $('#tbody-result-table').empty();
                 //alert(callback.ans_request)
-                for (var i = 0; i <callback.ans_request.length; i ++) {
-                    $('#result-table').append('<tr><td>' + callback.ans_request[i] + '</td></tr>');
+
+                // se a última mensagem da lista é timeout ou busy (TOAST)
+                // se qualquer mensagem da lista é timeout ou busi (DO NOT WRITE IT)
+
+                for (var i = callback.ans_request.length; i > 0; i--) {
+                    if ((callback.ans_request[i-1]) != 'busy' && (callback.ans_request[i-1]) != 'timeout') {
+                        $('#result-table').append('<tr><td>' + callback.ans_request[i-1] + '</td></tr>');
+                    }
                 }
+
+                if ((callback.ans_request[callback.ans_request.length - 1]) == 'busy')
+                {
+                    Materialize.toast('Unidade Ocupada !', 4000)
+                }
+                else if((callback.ans_request[callback.ans_request.length - 1]) == 'timeout')
+                {
+                    Materialize.toast('Timeout !', 4000)
+                }
+
+/*
+                if (callback.ans_request[callback.ans_request.length - 1] == 'busy'){
+                    Materialize.toast('Unidade Ocupada', 4000)
+                }
+                else if (callback.ans_request[callback.ans_request.length - 1] == 'timeout'){
+                    Materialize.toast('Timeout, tente novamente', 4000)
+                }
+                else
+                {
+                    for (var i = 0; i <callback.ans_request.length; i ++) {
+                        $('#result-table').append('<tr><td>' + callback.ans_request[i] + '</td></tr>');
+                    }
+                }
+*/
             },
             error: function() {
             $(this).html("error!");
@@ -82,5 +113,6 @@ $(document).ready(function() {
         });
 
     });
+
 });
 
