@@ -7,6 +7,15 @@ UDP_PORT = 4047
 READER = 0
 WRITER = 1
 
+"""
+Pipes:
+The Pipe() function returns a pair of connection objects connected by a pipe which by default is duplex (two-way)
+The two connection objects returned by Pipe() represent the two ends of the pipe. Each connection object has
+send() and recv() methods (among others). Note that data in a pipe may become corrupted if two processes (or threads) 
+try to read from or write to the same end of the pipe at the same time. Of course there is no risk of corruption from 
+processes using different ends of the pipe at the same time.
+"""
+
 
 class SocketServer:
 
@@ -36,13 +45,15 @@ class SocketServer:
             try:
                 data, addr = self.sock.recvfrom(1024)
                 data = data.decode('ascii')
-                print('[RECV] Recebido {} de {}' .format(data, addr))
+                print('[RECV] Recebido {}' .format(data))
                 id = re.findall(r'ID=([A-F0-9]{4})', data)
                 id_str = str(id[0])
                 self.addr_devices_list[id_str] = addr
                 self.answer_ack(data)
                 if not self.keep_alive(data):
-                    self.pending_requests[id_str]['channels'][WRITER].send(data)
+                    if id_str in self.pending_requests:
+                        answer_request = self.pending_requests[id_str]
+                        answer_request['channels'][WRITER].send(data)
             except (OSError, KeyboardInterrupt, socket.error) as e:
                 print('Error {}'.format(e))
                 sys.exit(0)
@@ -55,8 +66,9 @@ class SocketServer:
                 # {'device_id': {'data': '>QTT; bla blah<',
                 #                'sent': True/False,
                 #                'channels': (reader,writer)}}
-                to_send = self.pending_requests[device_id]['xvm']
-                self.pending_requests[device_id]['sent'] = True
+                request = self.pending_requests[device_id]
+                to_send = request['xvm']
+                request.update(({'sent': True}))
                 if bool(self.addr_devices_list.get(device_id)):
                     with self.lock:
                         self.sock.sendto((to_send + '\r\n').encode(), self.addr_devices_list[device_id])
@@ -97,7 +109,6 @@ class SocketServer:
         return crc
 
     def send_command(self, device_id, cmd, mdt):
-        print('self.pending_requests {}' .format(str(self.pending_requests)))
         if self.pending_requests.get(str(device_id)) is not None:
             return 'busy'
         if mdt == 'False':
@@ -117,7 +128,7 @@ class SocketServer:
                                  seq=str(hex(self.num_sequence))[2:].upper().zfill(4),
                                  crc=str(crc))
 
-        new_request = {'channels': Pipe(), 'sent': False, 'xvm': xvm_cmd}
+        new_request = {'channels': Pipe(), 'sent': False, 'xvm': xvm_cmd, 'cancelled': False}
         self.pending_requests[device_id] = new_request
         self.socketsend_queue.put(device_id)    # só avisa o processo SocketServer.sending()
 
@@ -130,6 +141,9 @@ class SocketServer:
     def wait_response(self, request_id, timeout=5):
         request = self.pending_requests[request_id]
         reader = request['channels'][READER]
+        # reader.poll = TRUE quando:
+            # 1. chega algo em recvfrom que não é keep alive
+            # 2. usuario cancelar o pedido
         if reader.poll(timeout):
             answer = reader.recv()
             del self.pending_requests[request_id]
@@ -137,3 +151,10 @@ class SocketServer:
         else:
             del self.pending_requests[request_id]
             return 'timeout'
+
+    def cancel_request(self, request_id):
+        request = self.pending_requests[request_id]
+        #request.update({'cancelled': True})
+        request['channels'][WRITER].send('request cancelled')
+
+
