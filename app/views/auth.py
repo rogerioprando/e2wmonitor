@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for
-
+from flask import Blueprint, render_template, request, session, redirect, url_for
 auth = Blueprint('auth', __name__)
 
 
@@ -16,6 +15,5 @@ def do_admin_login():
             session['logged_in'] = request.form['username']
             return redirect(url_for('website.send_message_to_device'))
         else:
-            #flash('wrong user or password')
             return home()
     return home()

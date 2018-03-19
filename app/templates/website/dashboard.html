@@ -4,59 +4,73 @@
 
 {% block body %}
 {{ super() }}
+<!-- Navbar goes here -->
 
- <!-- Titulo principal -->
-  <h2 class="header center green-text text-darken-2">Dashboard</h2>
-    <div id="using-color">
-            <h4 class="header">Unidades</h4>
-            <div class="row">
-              <div class="col s12 m4 l3">
-                <p>Consórcio Fênix</p>
-              </div>
-              <div class="col s12 m8 l9">
-
-                <ul class="collapsible collapsible-accordion" data-collapsible="expandable">
-                  <li class="">
-                    <div class="collapsible-header purple white-text"><i class="mdi-device-access-alarms"></i> First Header</div>
-                    <div class="collapsible-body purple lighten-5" style="display: none;">
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                    </div>
-                  </li>
-                  <li class="">
-                    <div class="collapsible-header red white-text"><i class="mdi-device-battery-charging-20"></i> Second Header</div>
-                    <div class="collapsible-body red lighten-5 lighten-5" style="display: none;">
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      </p>
-                    </div>
-                  </li>
-                  <li class="">
-                    <div class="collapsible-header teal white-text"><i class="mdi-device-dvr"></i> Third Header</div>
-                    <div class="collapsible-body teal lighten-5" style="display: none;">
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      </p>
-                    </div>
-                  </li>
-                  <li class="">
-                    <div class="collapsible-header lime darken-4 white-text"><i class="mdi-device-bluetooth-searching"></i> Forth Header</div>
-                    <div class="collapsible-body lime lighten-5" style="display: none;">
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      </p>
-                    </div>
-                  </li>
-                  <li>
-                    <div class="collapsible-header orange white-text"><i class="mdi-device-now-widgets"></i> Fifth Header</div>
-                    <div class="collapsible-body orange lighten-5">
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                      </p>
-                    </div>
-                  </li>
-                </ul>
-
-              </div>
+    <!-- Page Layout here -->
+<div class="container">
+    <h4 class="header center green-text text-darken-2">Opções: </h4>
+    <form id="form-send-query" class="" role="form" method="POST" action="{{ url_for('website.dashboard') }}">
+        <div class="row col s12" id="cli-id-pre">
+            <div class="input-field col s4">
+                <select id="select-input-client">
+                    <option value="" disabled selected>Selecione</option>
+                    <option value="1">ABC</option>
+                    <option value="2">C. Fênix</option>
+                    <option value="3">Metra</option>
+                    <option value="4">P. Marron</option>
+                    <option value="5">Publix</option>
+                    <option value="6">SBCTrans</option>
+                    <option value="7">Translitoral</option>
+                </select>
+                <label>Cliente</label>
             </div>
-          </div>
 
+            <div class="input-field col s4">
+                <select id="select-input-wplexid">
+                    <option value="" disabled selected>Selecione</option>
+                    <option value="1">1000</option>
+                    <option value="2">2000</option>
+                    <option value="3">2500</option>
+                    <option value="4">3200</option>
+                    <option value="5">4100</option>
+                    <option value="6">4200</option>
+                    <option value="7">4250</option>
+                </select>
+                <label>ID WPLEX</label>
+            </div>
+            <div class="input-field col s4">
+                <select id="select-input-prefix">
+                    <option value="" disabled selected>Selecione</option>
+                    <option value="1">RUS00</option>
+                    <option value="2">RUS01</option>
+                    <option value="3">RUS02</option>
+                    <option value="4">RAX11</option>
+                    <option value="5">RUV1092</option>
+                    <option value="6">RUV1121</option>
+                </select>
+                <label>Prefixo</label>
+            </div>
+        </div>
+        <div class="row col s12">
+            <div class="col s2">
+                <label>Data Inicio</label>
+                <input type="datetime-local" id="start-datetime">
+            </div>
+            <div class="col s2">
+                <label>Data Fim</label>
+                <input type="datetime-local" id="end-datetime">
+            </div>
+        </div>
+        <button id="query-btn" class="btn  waves-effect waves-light" type="submit" value="send">Enviar
+            <i class = "material-icons right">send</i>
+        </button>
+        <button id="cancel-query-btn" class="btn  waves-effect waves-light red disabled" type="submit" value="cancel">Cancelar
+            <i class = "material-icons right">cancel</i>
+        </button>
+      </form>
+
+    <h4 class="header center green-text text-darken-2">Resultado: </h4>
+    <p id="test-result"></p>
+</div>
 
 {% endblock %}

@@ -30,7 +30,7 @@
                     {% endfor %}
                     {% endif %}
                         </select>
-                    <label>ID WPLEX</label>
+                    <label>ID WPLEX</label> <p>Último keepalive: 1m42s</p>
                 </div>
             </div>
             <div class="row">
@@ -50,7 +50,13 @@
                     <label for="filled-in-box">MDT</label>
                 </div>
             </div>
-
+            <div class="row">
+                <h6>Timeout (segundos): </h6>
+                <p class="range-field">
+                    <input class ="range col s12 m6 l3" type="range" id="timeout-slider" name="timeout_xvm" value="5"
+                           min="5" max="120" step="5"/>
+                </p>
+            </div>
             {% if online_devices == 0 %}
                 <button id="submit-btn disabled" class="btn waves-effect waves-light disabled" type="submit">Enviar
                     <i class = "material-icons right">send</i>

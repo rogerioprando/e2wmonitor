@@ -7,15 +7,6 @@ UDP_PORT = 4047
 READER = 0
 WRITER = 1
 
-"""
-Pipes:
-The Pipe() function returns a pair of connection objects connected by a pipe which by default is duplex (two-way)
-The two connection objects returned by Pipe() represent the two ends of the pipe. Each connection object has
-send() and recv() methods (among others). Note that data in a pipe may become corrupted if two processes (or threads) 
-try to read from or write to the same end of the pipe at the same time. Of course there is no risk of corruption from 
-processes using different ends of the pipe at the same time.
-"""
-
 
 class SocketServer:
 
@@ -23,7 +14,6 @@ class SocketServer:
 
     def __init__(self):
         self.socketsend_queue = Queue()
-        self.socketrecv_queue = Queue()
         self.num_sequence = 1            # 0001 a 7FFF (hexadecimal)
         self.manager = Manager()
         self.addr_devices_list = self.manager.dict()
@@ -50,10 +40,9 @@ class SocketServer:
                 id_str = str(id[0])
                 self.addr_devices_list[id_str] = addr
                 self.answer_ack(data)
-                if not self.keep_alive(data):
-                    if id_str in self.pending_requests:
-                        answer_request = self.pending_requests[id_str]
-                        answer_request['channels'][WRITER].send(data)
+                if not self.keep_alive(data) and id_str in self.pending_requests:
+                    answer_request = self.pending_requests[id_str]
+                    answer_request['channels'][WRITER].send(data)
             except (OSError, KeyboardInterrupt, socket.error) as e:
                 print('Error {}'.format(e))
                 sys.exit(0)
@@ -86,6 +75,11 @@ class SocketServer:
             return True
         else:
             return False
+
+    @staticmethod
+    def multi_line_answer(data):
+        # verifica se o comando é multiline (QISAL e QEPE)
+        return True
 
     def answer_ack(self, data):
         default = '>ACK;ID={id};#{seq};*{crc}<'
@@ -138,7 +132,7 @@ class SocketServer:
             self.num_sequence = 1
         return device_id
 
-    def wait_response(self, request_id, timeout=5):
+    def wait_response(self, request_id, timeout):
         request = self.pending_requests[request_id]
         reader = request['channels'][READER]
         # reader.poll = TRUE quando:

@@ -2,12 +2,35 @@ $(document).ready(function() {
 
     $('select').material_select();  // atualiza select input-field
 
-        $('#submit-btn').on('click', function() {
-            $(this).addClass('disabled');
-            $('#cancel-btn').addClass('btn waves-effect waves-light red').removeClass('disabled');
-            //$('#loading-cmd').addClass('active');
-            //$('#loading-cmd').show().addClass('active');
-        });
+    $('.datepicker').pickadate({
+        selectMonths: true, // Creates a dropdown to control month
+        selectYears: 15, // Creates a dropdown of 15 years to control year,
+        show_months_full: false,
+        today: 'Hoje',
+        clear: 'Limpar',
+        close: 'Ok',
+        format_submit: 'yyyy-mm-dd',
+        closeOnSelect: false // Close upon selecting a date,
+    });
+
+    $('.timepicker').pickatime({
+        default: 'now', // Set default time: 'now', '1:30AM', '16:30'
+        fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
+        twelvehour: false, // Use AM/PM or 24-hour format
+        donetext: 'OK', // text for done-button
+        cleartext: 'Limpar', // text for clear-button
+        canceltext: 'Cancelar', // Text for cancel-button
+        autoclose: false, // automatic close timepicker
+        ampmclickable: true, // make AM PM clickable
+        aftershow: function(){} //Function for after opening timepicker
+    });
+
+    $('#submit-btn').on('click', function() {
+        $(this).addClass('disabled');
+        $('#cancel-btn').addClass('btn waves-effect waves-light red').removeClass('disabled');
+        //$('#loading-cmd').addClass('active');
+        //$('#loading-cmd').show().addClass('active');
+    });
 
     $('#cancel-btn').on('click', function() {
         $(this).addClass('disabled');
@@ -36,8 +59,8 @@ $(document).ready(function() {
 
     */
 
-        $("#form-send-command button").click(function (ev) {
-        ev.preventDefault() // cancel form submission
+    $("#form-send-command button").click(function (ev) {
+    ev.preventDefault() // cancel form submission
 
         if ($(this).attr("value") == "send") {
 
@@ -46,10 +69,13 @@ $(document).ready(function() {
             {
                 check = 'True'
             }
+
+
             var data = ({
                 "id_xvm": $('#select-input-xvm-id option:selected').text(),
                 "cmd_xvm": $('#cmd-xvm').val(),
-                "mdt_xvm": check
+                "mdt_xvm": check,
+                "timeout_xvm" : $('#timeout-slider').val(),
             });
 
             //var foo2 = $('#select-input-xvm-id option:selected').val();
@@ -120,6 +146,54 @@ $(document).ready(function() {
                 }
             });
         }
+    });
+
+
+    $("#form-send-query button").click(function(ev) {
+    ev.preventDefault() // cancel form submission
+    console.log('button query')
+
+
+        if ($(this).attr("value") == "send") {
+            console.log('if send')
+
+            var data = ({
+                "client": $('#select-input-client option:selected').text(),
+                "wplex_id": $('#select-input-wplexid option:selected').text(),
+                "prefix": $('#select-input-prefix option:selected').text(),
+                "start_dt": $('#start-datetime').val(),
+                "end_dt": $('#end-datetime').val(),
+            });
+
+            console.log(JSON.stringify(data));
+            alert(JSON.stringify(data))
+            $.ajax({
+                type: 'POST',
+                url: '/dashboard',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(data),
+                context: this,
+                success: function(callback) {
+                    console.log(callback);
+                    console.log('sucesso ajax');
+                    $('#test-result').html(callback);
+                },
+                error: function() {
+                    console.log('erro ajax')
+                    $(this).html("cancel error!");
+                }
+            });
+
+        }
+
+        if ($(this).attr("value") == "cancel") {
+            // quando foi cancelada a consulta
+            // habilita botão enviar
+            // desabilita botão cancelar
+            // ajax post method
+        }
+
     });
 
 });
